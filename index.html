@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>저장소 카드 뉴스</title>
+<style>
+  :root {
+    --bg: #0f1115;
+    --surface: #171a21;
+    --surface-hover: #1f2330;
+    --border: #262b38;
+    --text: #e8eaf0;
+    --text-dim: #9aa1b2;
+    --accent: #5b8def;
+    --accent-soft: rgba(91, 141, 239, 0.15);
+    --chip-bg: #232838;
+    --shadow: rgba(0, 0, 0, 0.35);
+  }
+  @media (prefers-color-scheme: light) {
+    :root {
+      --bg: #f5f6f9;
+      --surface: #ffffff;
+      --surface-hover: #ffffff;
+      --border: #e4e7ee;
+      --text: #1b1e27;
+      --text-dim: #6b7280;
+      --accent: #3865d6;
+      --accent-soft: rgba(56, 101, 214, 0.1);
+      --chip-bg: #eef1f8;
+      --shadow: rgba(30, 40, 70, 0.12);
+    }
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Pretendard", "Malgun Gothic", sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    padding: 32px 20px 60px;
+  }
+
+  header {
+    max-width: 1160px;
+    margin: 0 auto 8px;
+  }
+
+  header h1 {
+    font-size: 1.7rem;
+    margin: 0 0 6px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  header p {
+    color: var(--text-dim);
+    margin: 0;
+    font-size: 0.95rem;
+  }
+
+  .mock-banner {
+    max-width: 1160px;
+    margin: 18px auto 28px;
+    padding: 10px 16px;
+    background: var(--accent-soft);
+    border: 1px solid var(--accent);
+    border-radius: 8px;
+    font-size: 0.85rem;
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  main {
+    max-width: 1160px;
+    margin: 0 auto;
+  }
+
+  #card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 20px;
+  }
+
+  @media (max-width: 620px) {
+    #card-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .card {
+    display: flex;
+    flex-direction: column;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    overflow: hidden;
+    text-decoration: none;
+    color: var(--text);
+    box-shadow: 0 1px 3px var(--shadow);
+    transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+  }
+
+  .card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 24px var(--shadow);
+    border-color: var(--accent);
+    background: var(--surface-hover);
+  }
+
+  .card-thumb {
+    width: 100%;
+    aspect-ratio: 1200 / 630;
+    background: var(--chip-bg);
+    overflow: hidden;
+  }
+
+  .card-thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.25s ease;
+  }
+
+  .card:hover .card-thumb img {
+    transform: scale(1.04);
+  }
+
+  .card-body {
+    padding: 16px 18px 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    flex: 1;
+  }
+
+  .card-title {
+    font-size: 1.05rem;
+    font-weight: 600;
+    line-height: 1.3;
+  }
+
+  .card-desc {
+    font-size: 0.87rem;
+    color: var(--text-dim);
+    line-height: 1.5;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .card-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .tag {
+    font-size: 0.72rem;
+    padding: 3px 9px;
+    background: var(--chip-bg);
+    color: var(--text-dim);
+    border-radius: 999px;
+  }
+
+  .card-footer {
+    margin-top: auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.76rem;
+    color: var(--text-dim);
+    padding-top: 6px;
+    border-top: 1px solid var(--border);
+  }
+
+  .status-dot {
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #4caf7d;
+    margin-right: 5px;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>📰 저장소 카드 뉴스</h1>
+  <p>최근 푸시된 상위 5개 저장소를 카드로 살펴보고, 클릭해서 배포 페이지로 이동하세요.</p>
+</header>
+
+<div class="mock-banner" id="mock-banner">
+  ⚠️ /api/repos 호출에 실패하면 가상 데이터로 대체 표시됩니다 (로컬에서 파일을 직접 열었을 때 등).
+</div>
+
+<main>
+  <div id="card-grid"></div>
+</main>
+
+<script>
+  // 실제 연동 시 이 배열을 GitHub API 응답(pushed_at 상위 5개)으로 교체
+  const mockRepos = [
+    {
+      owner: "kokim80",
+      name: "portfolio-dashboard",
+      description: "Notion과 연동되는 개인 포트폴리오 대시보드. 저장소 메타데이터를 자동 수집해 카드 형태로 정리한다.",
+      homepage: "https://example.com/demo-portfolio-dashboard",
+      html_url: "https://github.com/kokim80/portfolio-dashboard",
+      pushedAt: "2026-08-04T09:20:00Z",
+      topics: ["Next.js", "Notion API", "TypeScript"]
+    },
+    {
+      owner: "kokim80",
+      name: "repo-sync-bot",
+      description: "GitHub 저장소 목록을 주기적으로 조회해 Notion 데이터베이스에 동기화하는 자동화 워크플로우.",
+      homepage: "",
+      html_url: "https://github.com/kokim80/repo-sync-bot",
+      pushedAt: "2026-07-28T14:05:00Z",
+      topics: ["Automation", "GitHub API", "MCP"]
+    },
+    {
+      owner: "kokim80",
+      name: "card-news-viewer",
+      description: "마지막 푸시일 기준 상위 저장소를 카드 뉴스 형태로 보여주는 정적 웹페이지.",
+      homepage: "https://example.com/demo-card-news-viewer",
+      html_url: "https://github.com/kokim80/card-news-viewer",
+      pushedAt: "2026-07-19T02:40:00Z",
+      topics: ["HTML", "CSS", "JavaScript"]
+    },
+    {
+      owner: "kokim80",
+      name: "mermaid-diagram-lab",
+      description: "저장소 구조를 Mermaid 다이어그램으로 자동 생성해보는 실험 프로젝트.",
+      homepage: "",
+      html_url: "https://github.com/kokim80/mermaid-diagram-lab",
+      pushedAt: "2026-06-30T11:12:00Z",
+      topics: ["Mermaid", "Documentation"]
+    },
+    {
+      owner: "kokim80",
+      name: "resend-mailer-util",
+      description: "작업 완료 알림을 Resend API로 발송하는 유틸리티 모음.",
+      homepage: "https://example.com/demo-resend-mailer-util",
+      html_url: "https://github.com/kokim80/resend-mailer-util",
+      pushedAt: "2026-06-12T08:00:00Z",
+      topics: ["Node.js", "Email", "API"]
+    }
+  ];
+
+  function timeAgo(isoDate) {
+    const diffMs = Date.now() - new Date(isoDate).getTime();
+    const days = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+    if (days <= 0) return "오늘";
+    if (days < 30) return `${days}일 전`;
+    const months = Math.floor(days / 30);
+    if (months < 12) return `${months}개월 전`;
+    return `${Math.floor(months / 12)}년 전`;
+  }
+
+  function renderCards(repos) {
+    const grid = document.getElementById("card-grid");
+    grid.innerHTML = "";
+
+    repos.slice(0, 5).forEach((repo) => {
+      const link = repo.homepage && repo.homepage.trim() !== "" ? repo.homepage : repo.html_url;
+      const thumbUrl = `https://opengraph.githubassets.com/1/${repo.owner}/${repo.name}`;
+
+      const card = document.createElement("a");
+      card.className = "card";
+      card.href = link;
+      card.target = "_blank";
+      card.rel = "noopener noreferrer";
+
+      card.innerHTML = `
+        <div class="card-thumb">
+          <img src="${thumbUrl}" alt="${repo.name} 썸네일" loading="lazy">
+        </div>
+        <div class="card-body">
+          <div class="card-title">${repo.name}</div>
+          <div class="card-desc">${repo.description || "정보 부족"}</div>
+          <div class="card-tags">
+            ${repo.topics.map((t) => `<span class="tag">${t}</span>`).join("")}
+          </div>
+          <div class="card-footer">
+            <span><span class="status-dot"></span>${repo.owner}</span>
+            <span>${timeAgo(repo.pushedAt)} 업데이트</span>
+          </div>
+        </div>
+      `;
+
+      grid.appendChild(card);
+    });
+  }
+
+  async function loadRepos() {
+    try {
+      const res = await fetch("/api/repos");
+      if (!res.ok) throw new Error(`API 응답 오류: ${res.status}`);
+      const repos = await res.json();
+      if (!Array.isArray(repos) || repos.length === 0) throw new Error("빈 응답");
+      renderCards(repos);
+      const banner = document.getElementById("mock-banner");
+      if (banner) banner.style.display = "none";
+    } catch (err) {
+      console.warn("실제 데이터를 불러오지 못해 가상 데이터로 표시합니다.", err);
+      renderCards(mockRepos);
+    }
+  }
+
+  loadRepos();
+</script>
+
+</body>
+</html>
