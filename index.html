@@ -206,52 +206,52 @@
 </main>
 
 <script>
-  // 실제 연동 시 이 배열을 GitHub API 응답(pushed_at 상위 5개)으로 교체
+  // /api/repos 호출 실패 시 대체 표시용. 실제 서비스 대상 5개 저장소와 동일한 내용을 담아둔다.
   const mockRepos = [
     {
-      owner: "kokim80",
-      name: "portfolio-dashboard",
-      description: "Notion과 연동되는 개인 포트폴리오 대시보드. 저장소 메타데이터를 자동 수집해 카드 형태로 정리한다.",
-      homepage: "https://example.com/demo-portfolio-dashboard",
-      html_url: "https://github.com/kokim80/portfolio-dashboard",
-      pushedAt: "2026-08-04T09:20:00Z",
-      topics: ["Next.js", "Notion API", "TypeScript"]
+      owner: "kokim80-maker",
+      name: "airport",
+      description: "인천공항 입출국장 혼잡도를 조회하고 자주 보는 시간대를 즐겨찾기로 저장하는 대시보드",
+      homepage: "https://airport-teal-two.vercel.app",
+      html_url: "https://github.com/kokim80-maker/airport",
+      pushedAt: "2026-07-24T05:55:13Z",
+      topics: []
     },
     {
-      owner: "kokim80",
-      name: "repo-sync-bot",
-      description: "GitHub 저장소 목록을 주기적으로 조회해 Notion 데이터베이스에 동기화하는 자동화 워크플로우.",
-      homepage: "",
-      html_url: "https://github.com/kokim80/repo-sync-bot",
-      pushedAt: "2026-07-28T14:05:00Z",
-      topics: ["Automation", "GitHub API", "MCP"]
+      owner: "kokim80-maker",
+      name: "recipe",
+      description: "냉장고 사진으로 식재료를 인식해 만들 수 있는 레시피를 추천하고 저장하는 웹 앱",
+      homepage: "https://recipe-ten-roan.vercel.app",
+      html_url: "https://github.com/kokim80-maker/recipe",
+      pushedAt: "2026-07-28T08:03:18Z",
+      topics: []
     },
     {
-      owner: "kokim80",
-      name: "card-news-viewer",
-      description: "마지막 푸시일 기준 상위 저장소를 카드 뉴스 형태로 보여주는 정적 웹페이지.",
-      homepage: "https://example.com/demo-card-news-viewer",
-      html_url: "https://github.com/kokim80/card-news-viewer",
-      pushedAt: "2026-07-19T02:40:00Z",
-      topics: ["HTML", "CSS", "JavaScript"]
+      owner: "kokim80-maker",
+      name: "econo",
+      description: "정보 부족",
+      homepage: "https://econo-teal.vercel.app",
+      html_url: "https://github.com/kokim80-maker/econo",
+      pushedAt: "2026-07-05T16:53:48Z",
+      topics: []
     },
     {
-      owner: "kokim80",
-      name: "mermaid-diagram-lab",
-      description: "저장소 구조를 Mermaid 다이어그램으로 자동 생성해보는 실험 프로젝트.",
-      homepage: "",
-      html_url: "https://github.com/kokim80/mermaid-diagram-lab",
-      pushedAt: "2026-06-30T11:12:00Z",
-      topics: ["Mermaid", "Documentation"]
+      owner: "kokim80-maker",
+      name: "order",
+      description: "디저트 가게 메뉴를 담아 주문하고 본인 주문 내역을 조회하는 서비스",
+      homepage: "https://order-red-chi.vercel.app",
+      html_url: "https://github.com/kokim80-maker/order",
+      pushedAt: "2026-07-22T07:28:13Z",
+      topics: []
     },
     {
-      owner: "kokim80",
-      name: "resend-mailer-util",
-      description: "작업 완료 알림을 Resend API로 발송하는 유틸리티 모음.",
-      homepage: "https://example.com/demo-resend-mailer-util",
-      html_url: "https://github.com/kokim80/resend-mailer-util",
-      pushedAt: "2026-06-12T08:00:00Z",
-      topics: ["Node.js", "Email", "API"]
+      owner: "kokim80-maker",
+      name: "alram",
+      description: "간단한 알람",
+      homepage: "https://alram-ruddy.vercel.app",
+      html_url: "https://github.com/kokim80-maker/alram",
+      pushedAt: "2026-07-24T08:17:14Z",
+      topics: []
     }
   ];
 
@@ -304,11 +304,15 @@
     try {
       const res = await fetch("/api/repos");
       if (!res.ok) throw new Error(`API 응답 오류: ${res.status}`);
-      const repos = await res.json();
+      const data = await res.json();
+      const repos = data.repos;
       if (!Array.isArray(repos) || repos.length === 0) throw new Error("빈 응답");
       renderCards(repos);
       const banner = document.getElementById("mock-banner");
       if (banner) banner.style.display = "none";
+      if (Array.isArray(data.failed) && data.failed.length > 0) {
+        console.warn("일부 저장소 조회 실패:", data.failed);
+      }
     } catch (err) {
       console.warn("실제 데이터를 불러오지 못해 가상 데이터로 표시합니다.", err);
       renderCards(mockRepos);
