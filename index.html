@@ -255,6 +255,15 @@
     }
   ];
 
+  // 저장소명 기준 카드 제목/썸네일 오버라이드. 없으면 저장소명 + GitHub OpenGraph 이미지 사용
+  const DISPLAY_OVERRIDES = {
+    airport: { title: "인천공항 혼잡도 대시보드", image: "images/airport.png" },
+    order: { title: "오늘의주문", image: "images/order.png" },
+    recipe: { title: "냉장고 재료 인식", image: "images/recipe.png" },
+    econo: { title: "한입경제", image: "images/econo.png" },
+    alram: { title: "알람", image: "images/alram.png" },
+  };
+
   function timeAgo(isoDate) {
     const diffMs = Date.now() - new Date(isoDate).getTime();
     const days = Math.floor(diffMs / (1000 * 60 * 60 * 24));
@@ -271,7 +280,9 @@
 
     repos.slice(0, 5).forEach((repo) => {
       const link = repo.homepage && repo.homepage.trim() !== "" ? repo.homepage : repo.html_url;
-      const thumbUrl = `https://opengraph.githubassets.com/1/${repo.owner}/${repo.name}`;
+      const override = DISPLAY_OVERRIDES[repo.name.toLowerCase()];
+      const thumbUrl = override && override.image ? override.image : `https://opengraph.githubassets.com/1/${repo.owner}/${repo.name}`;
+      const title = override && override.title ? override.title : repo.name;
 
       const card = document.createElement("a");
       card.className = "card";
@@ -281,10 +292,10 @@
 
       card.innerHTML = `
         <div class="card-thumb">
-          <img src="${thumbUrl}" alt="${repo.name} 썸네일" loading="lazy">
+          <img src="${thumbUrl}" alt="${title} 썸네일" loading="lazy">
         </div>
         <div class="card-body">
-          <div class="card-title">${repo.name}</div>
+          <div class="card-title">${title}</div>
           <div class="card-desc">${repo.description || "정보 부족"}</div>
           <div class="card-tags">
             ${repo.topics.map((t) => `<span class="tag">${t}</span>`).join("")}
