@@ -5,7 +5,7 @@ const OWNER = "kokim80-maker";
 const TARGET_REPOS = [
   { name: "airport", summary: "인천공항 입출국장 혼잡도를 조회하고 자주 보는 시간대를 즐겨찾기로 저장하는 대시보드" },
   { name: "recipe", summary: "냉장고 사진으로 식재료를 인식해 만들 수 있는 레시피를 추천하고 저장하는 웹 앱" },
-  { name: "econo", summary: "정보 부족" },
+  { name: "econo", summary: "바쁜 직장인·주부가 매일 5~10분씩 오늘의 경제 핵심과 흐름을 파악하고, 관련 주식 업종·기업까지 자연스럽게 연결해서 학습하는 서비스" },
   { name: "order", summary: "디저트 가게 메뉴를 담아 주문하고 본인 주문 내역을 조회하는 서비스" },
   { name: "alram", summary: "간단한 알람" },
 ];
